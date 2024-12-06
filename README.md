@@ -51,6 +51,7 @@ python main.py
 ```
 
 2. Using the GUI:
+   - First Be Sure that the M3U File Contains urls Channels Works 😲
    - Click "Browse" to select an M3U file
    - Choose an output directory for downloads
    - Set the number of concurrent downloads (default: 3)
