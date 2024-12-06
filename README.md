@@ -34,7 +34,7 @@ The application is built with a modular architecture consisting of several key c
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/m3u-downloader.git
+git clone https://github.com/zinzied/m3u-downloader.git
 cd m3u-downloader
 ```
 
