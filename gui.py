@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
+from ttkthemes import ThemedTk
 import os
 from typing import Dict, List, Optional
 from m3u_parser import M3UParser, M3UEntry
@@ -9,10 +10,19 @@ import threading
 
 class M3UDownloaderGUI:
     def __init__(self):
-        self.window = tk.Tk()
+        self.window = ThemedTk(theme="equilux")  # Modern dark theme
         self.window.title("M3U Downloader")
-        self.window.geometry("1000x700")
+        self.window.geometry("1200x800")
         
+        # Configure colors
+        self.colors = {
+            'bg': '#2e2e2e',
+            'fg': '#ffffff',
+            'accent': '#007acc',
+            'hover': '#1e90ff'
+        }
+        
+        self.window.configure(bg=self.colors['bg'])
         self.download_manager = DownloadManager(max_concurrent=3)
         self.entries: List[M3UEntry] = []
         self.setup_gui()
@@ -20,60 +30,88 @@ class M3UDownloaderGUI:
     def setup_gui(self):
         # Style configuration
         style = ttk.Style()
-        style.configure("Treeview", rowheight=25)
+        style.configure("Custom.TButton",
+            padding=10,
+            font=('Segoe UI', 10),
+            background=self.colors['accent']
+        )
+        
+        style.configure("Custom.TEntry",
+            fieldbackground=self.colors['bg'],
+            foreground=self.colors['fg']
+        )
+        
+        style.configure("Custom.Treeview",
+            background=self.colors['bg'],
+            foreground=self.colors['fg'],
+            fieldbackground=self.colors['bg'],
+            rowheight=30
+        )
+        
+        style.configure("Custom.TLabelframe",
+            background=self.colors['bg'],
+            foreground=self.colors['fg']
+        )
         
         # Main container
-        main_container = ttk.Frame(self.window, padding="10")
+        main_container = ttk.Frame(self.window, padding="20")
         main_container.pack(fill=tk.BOTH, expand=True)
         
-        # File selection frame
-        file_frame = ttk.LabelFrame(main_container, text="File Selection", padding="10")
-        file_frame.pack(fill=tk.X, pady=(0, 10))
+        # File selection frame with gradient effect
+        file_frame = ttk.LabelFrame(main_container, text="File Selection", padding="15", style="Custom.TLabelframe")
+        file_frame.pack(fill=tk.X, pady=(0, 15))
         
         self.m3u_path = tk.StringVar()
         self.output_dir = tk.StringVar()
         
-        # M3U file selection
-        ttk.Label(file_frame, text="M3U File:").grid(row=0, column=0, sticky=tk.W, padx=5)
-        ttk.Entry(file_frame, textvariable=self.m3u_path, width=60).grid(row=0, column=1, padx=5)
-        ttk.Button(file_frame, text="Browse", command=self.browse_m3u).grid(row=0, column=2, padx=5)
+        # M3U file selection with modern layout
+        file_select_frame = ttk.Frame(file_frame)
+        file_select_frame.pack(fill=tk.X, pady=5)
         
-        # Output directory selection
-        ttk.Label(file_frame, text="Output Directory:").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
-        ttk.Entry(file_frame, textvariable=self.output_dir, width=60).grid(row=1, column=1, padx=5, pady=5)
-        ttk.Button(file_frame, text="Browse", command=self.browse_output).grid(row=1, column=2, padx=5, pady=5)
+        ttk.Label(file_select_frame, text="M3U File:", font=('Segoe UI', 10)).pack(side=tk.LEFT, padx=5)
+        ttk.Entry(file_select_frame, textvariable=self.m3u_path, width=70, style="Custom.TEntry").pack(side=tk.LEFT, padx=5)
+        ttk.Button(file_select_frame, text="Browse", command=self.browse_m3u, style="Custom.TButton").pack(side=tk.LEFT, padx=5)
+        
+        # Output directory selection with modern layout
+        output_select_frame = ttk.Frame(file_frame)
+        output_select_frame.pack(fill=tk.X, pady=5)
+        
+        ttk.Label(output_select_frame, text="Output Directory:", font=('Segoe UI', 10)).pack(side=tk.LEFT, padx=5)
+        ttk.Entry(output_select_frame, textvariable=self.output_dir, width=70, style="Custom.TEntry").pack(side=tk.LEFT, padx=5)
+        ttk.Button(output_select_frame, text="Browse", command=self.browse_output, style="Custom.TButton").pack(side=tk.LEFT, padx=5)
         
         # Download settings frame
-        settings_frame = ttk.LabelFrame(main_container, text="Download Settings", padding="10")
-        settings_frame.pack(fill=tk.X, pady=(0, 10))
+        settings_frame = ttk.LabelFrame(main_container, text="Download Settings", padding="15", style="Custom.TLabelframe")
+        settings_frame.pack(fill=tk.X, pady=(0, 15))
         
-        ttk.Label(settings_frame, text="Concurrent Downloads:").grid(row=0, column=0, sticky=tk.W, padx=5)
+        ttk.Label(settings_frame, text="Concurrent Downloads:", font=('Segoe UI', 10)).pack(side=tk.LEFT, padx=5)
         self.concurrent_var = tk.StringVar(value="3")
         concurrent_spinbox = ttk.Spinbox(settings_frame, from_=1, to=10, width=5, textvariable=self.concurrent_var)
-        concurrent_spinbox.grid(row=0, column=1, padx=5)
+        concurrent_spinbox.pack(side=tk.LEFT, padx=5)
         
-        # Files list frame
-        list_frame = ttk.LabelFrame(main_container, text="Files to Download", padding="10")
+        # Files list frame with modern styling
+        list_frame = ttk.LabelFrame(main_container, text="Files to Download", padding="15", style="Custom.TLabelframe")
         list_frame.pack(fill=tk.BOTH, expand=True)
         
-        # Create treeview
-        self.tree = ttk.Treeview(list_frame, columns=("Title", "URL", "Status", "Speed"), show="headings", selectmode="extended")
-        self.tree.heading("Title", text="Title")
-        self.tree.heading("URL", text="URL")
-        self.tree.heading("Status", text="Status")
-        self.tree.heading("Speed", text="Speed")
+        # Create modern treeview
+        self.tree = ttk.Treeview(list_frame, columns=("Title", "URL", "Status", "Speed"), 
+                                show="headings", selectmode="extended", style="Custom.Treeview")
         
-        self.tree.column("Title", width=300)
-        self.tree.column("URL", width=400)
+        # Configure modern column headers
+        for col in ("Title", "URL", "Status", "Speed"):
+            self.tree.heading(col, text=col, anchor=tk.W)
+            
+        self.tree.column("Title", width=350)
+        self.tree.column("URL", width=450)
         self.tree.column("Status", width=100)
         self.tree.column("Speed", width=100)
         
-        # Scrollbars
+        # Modern scrollbars
         y_scrollbar = ttk.Scrollbar(list_frame, orient=tk.VERTICAL, command=self.tree.yview)
         x_scrollbar = ttk.Scrollbar(list_frame, orient=tk.HORIZONTAL, command=self.tree.xview)
         self.tree.configure(yscrollcommand=y_scrollbar.set, xscrollcommand=x_scrollbar.set)
         
-        # Grid layout for treeview and scrollbars
+        # Grid layout
         self.tree.grid(row=0, column=0, sticky="nsew")
         y_scrollbar.grid(row=0, column=1, sticky="ns")
         x_scrollbar.grid(row=1, column=0, sticky="ew")
@@ -81,18 +119,29 @@ class M3UDownloaderGUI:
         list_frame.grid_columnconfigure(0, weight=1)
         list_frame.grid_rowconfigure(0, weight=1)
         
-        # Control buttons
+        # Control buttons with modern styling
         button_frame = ttk.Frame(main_container)
-        button_frame.pack(fill=tk.X, pady=10)
+        button_frame.pack(fill=tk.X, pady=15)
         
-        ttk.Button(button_frame, text="Load M3U", command=self.load_m3u).pack(side=tk.LEFT, padx=5)
-        ttk.Button(button_frame, text="Download Selected", command=self.download_selected).pack(side=tk.LEFT, padx=5)
-        ttk.Button(button_frame, text="Download All", command=self.download_all).pack(side=tk.LEFT, padx=5)
+        for text, command in [
+            ("Load M3U", self.load_m3u),
+            ("Download Selected", self.download_selected),
+            ("Download All", self.download_all)
+        ]:
+            btn = ttk.Button(button_frame, text=text, command=command, style="Custom.TButton")
+            btn.pack(side=tk.LEFT, padx=5)
         
-        # Status bar
+        # Modern status bar
         self.status_var = tk.StringVar()
         self.status_var.set("Ready")
-        status_bar = ttk.Label(main_container, textvariable=self.status_var, relief=tk.SUNKEN, anchor=tk.W)
+        status_bar = ttk.Label(
+            main_container,
+            textvariable=self.status_var,
+            relief=tk.SUNKEN,
+            anchor=tk.W,
+            font=('Segoe UI', 9),
+            padding=5
+        )
         status_bar.pack(fill=tk.X, pady=(5, 0))
         
     def browse_m3u(self):
