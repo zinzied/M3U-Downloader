@@ -1,27 +1,17 @@
 # M3U Downloader
 
-A powerful, asynchronous M3U playlist downloader with a user-friendly GUI interface. This application allows you to efficiently download media files from M3U playlists with optimized performance and progress tracking.
+A powerful, asynchronous M3U playlist downloader with a user-friendly GUI interface. Specially designed for downloading VOD content and series from IPTV M3U playlists with support for authentication and token management.
 
 ## Features
 
 - 🚀 **Asynchronous Downloads**: Utilizes Python's asyncio for efficient concurrent downloads
-- 📊 **Smart Download Optimization**: Automatically adjusts chunk sizes based on download speeds
+- 🎬 **VOD Support**: Download movies and series with proper file extensions
+- 🔐 **IPTV Authentication**: Handles token-based authentication and auto-refresh
+- 📊 **Real-time Progress**: Live download speed and progress tracking
 - 🎯 **Connection Pool Management**: Intelligent handling of concurrent connections
 - 📱 **User-Friendly GUI**: Clean and intuitive interface built with tkinter
-- 📝 **Progress Tracking**: Real-time progress and speed monitoring for each download
-- 🔄 **Resume Support**: Supports download resumption for interrupted transfers
-- 🎮 **Flexible Control**: Download selected items or entire playlists
+- 🔄 **Auto-Retry**: Automatic retry on failed downloads or expired tokens
 - 🛠 **Customizable Settings**: Adjust concurrent download limits and output directories
-
-## Architecture
-
-The application is built with a modular architecture consisting of several key components:
-
-- `AsyncDownloader`: Core download engine with async I/O operations
-- `DownloadOptimizer`: Smart optimization of chunk sizes and download speeds
-- `ConnectionPool`: Management of concurrent connections
-- `M3UParser`: Parsing and processing of M3U playlist files
-- `M3UDownloaderGUI`: User interface and download management
 
 ## Requirements
 
@@ -51,35 +41,54 @@ python main.py
 ```
 
 2. Using the GUI:
-   - First Be Sure that the M3U File Contains urls Channels Works 😲
-   - Click "Browse" to select an M3U file
-   - Choose an output directory for downloads
-   - Set the number of concurrent downloads (default: 3)
-   - Click "Load M3U" to parse the playlist
-   - Select items to download or use "Download All"
-   - Monitor progress in the main window
+   - Load your M3U file containing VOD/Series links
+   - Select output directory for downloads
+   - Set concurrent downloads (recommended: 2-3)
+   - Select items to download
+   - Monitor real-time progress and speed
 
 ## Key Components
 
 ### AsyncDownloader
 - Handles asynchronous file downloads
-- Manages connection pools and timeouts
-- Implements context manager for resource cleanup
+- Manages IPTV authentication and token refresh
+- Preserves original file extensions
+- Real-time speed calculation and progress updates
 
-### DownloadOptimizer
-- Dynamically adjusts chunk sizes based on performance
-- Maintains download speed history
-- Optimizes bandwidth usage
+### IPTVAuthenticator
+- Handles token-based authentication
+- Automatic token refresh on expiration
+- Supports various IPTV provider APIs
 
-### ConnectionPool
-- Manages concurrent connections
-- Prevents server overload
-- Implements connection limiting and tracking
+### DownloadManager
+- Manages concurrent downloads
+- Smart retry mechanism
+- Progress tracking and speed monitoring
 
-### M3UParser
-- Parses M3U playlist files
-- Extracts media URLs and metadata
-- Handles various M3U format variations
+### GUI Interface
+- Clean and intuitive design
+- Real-time download speeds
+- Progress tracking per file
+- File extension preservation
+
+## Supported Features
+
+- ✅ VOD/Movie downloads
+- ✅ Series/Episode downloads
+- ✅ Token-based authentication
+- ✅ Auto token refresh
+- ✅ Real-time speed display
+- ✅ Progress tracking
+- ✅ Original file extensions
+- ✅ Multiple concurrent downloads
+
+## Troubleshooting
+
+Common issues and solutions:
+
+- **458 Error**: Token expired - the app will automatically retry with a new token
+- **Download Stuck**: Check internet connection and server availability
+- **Wrong Extension**: File extensions are preserved from source URL
 
 ## Contributing
 
@@ -93,4 +102,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - Built with Python's asyncio for high-performance async I/O
 - Uses aiohttp for efficient HTTP requests
-- Implements best practices for concurrent downloads
+- Implements best practices for IPTV content downloading
