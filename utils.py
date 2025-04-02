@@ -34,3 +34,10 @@ def format_speed(speed_bytes: float) -> str:
         return f"{speed_bytes/1024:.1f} KB/s"
     else:
         return f"{speed_bytes/(1024*1024):.1f} MB/s"
+
+def format_status(progress: float) -> str:
+    """Format download status"""
+    if progress >= 100:
+        return "✅ Finished"
+    else:
+        return f"{progress:.1f}%"

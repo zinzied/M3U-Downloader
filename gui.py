@@ -7,7 +7,7 @@ from m3u_parser import M3UParser, M3UEntry
 from async_downloader import DownloadManager
 from file_utils import ensure_unique_filename
 import threading
-from utils import get_extension_from_url
+from utils import get_extension_from_url, format_speed, format_status
 
 class M3UDownloaderGUI:
     def __init__(self):
@@ -246,13 +246,15 @@ class M3UDownloaderGUI:
         else:
             return f"{speed/(1024*1024):.1f} MB/s"
         
-    def _update_progress(self, filename: str, progress: float, speed: Optional[float] = None):
+    def _update_progress(self, filename: str, progress: float, speed: str = None):
         for item in self.tree.get_children():
             if self.tree.item(item)['values'][0] == filename:
-                status = "Complete" if progress >= 100 else f"{progress:.1f}%"
+                status = format_status(progress)
                 self.tree.set(item, "Status", status)
-                if speed is not None:
-                    self.tree.set(item, "Speed", self._format_speed(speed))
+                if speed and progress < 100:
+                    self.tree.set(item, "Speed", speed)
+                elif progress >= 100:
+                    self.tree.set(item, "Speed", "")  # Clear speed when finished
                 break
                 
     def run(self):
@@ -261,4 +263,4 @@ class M3UDownloaderGUI:
         
     def _on_closing(self):
         self.download_manager.shutdown()
-        self.window.destroy
+        self.window.destroy()
