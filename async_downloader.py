@@ -7,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 from download_optimizer import DownloadOptimizer, ConnectionPool
 import time
 from iptv_auth import IPTVAuthenticator
+from utils import format_speed
 
 class AsyncDownloader:
     def __init__(self, max_concurrent: int = 3):
@@ -57,7 +58,7 @@ class AsyncDownloader:
         return url
 
     async def download_file(self, url: str, filepath: str, 
-                          progress_callback: Optional[Callable[[str, float, Optional[float]], None]] = None) -> None:
+                          progress_callback: Optional[Callable[[str, float, Optional[str]], None]] = None) -> None:
         retries = 0
         while retries < self.retry_count:
             try:
@@ -89,6 +90,7 @@ class AsyncDownloader:
                     downloaded = 0
                     start_time = time.time()
                     last_update = start_time
+                    chunk_sizes = []  # For calculating average speed
                     
                     os.makedirs(os.path.dirname(filepath), exist_ok=True)
                     
@@ -96,19 +98,29 @@ class AsyncDownloader:
                         async for chunk in response.content.iter_chunked(8192):
                             await f.write(chunk)
                             downloaded += len(chunk)
+                            chunk_sizes.append((time.time(), len(chunk)))
                             
+                            # Calculate speed over last 2 seconds
                             current_time = time.time()
                             if current_time - last_update >= 0.5:
-                                duration = current_time - last_update
-                                speed = len(chunk) / duration
+                                # Remove old chunks from calculation
+                                chunk_sizes = [(t, s) for t, s in chunk_sizes 
+                                             if current_time - t <= 2]
                                 
-                                if progress_callback and total_size:
-                                    progress = (downloaded / total_size) * 100
-                                    progress_callback(
-                                        os.path.basename(filepath),
-                                        progress,
-                                        speed
-                                    )
+                                if chunk_sizes:
+                                    duration = current_time - chunk_sizes[0][0]
+                                    if duration > 0:
+                                        speed = sum(s for _, s in chunk_sizes) / duration
+                                        speed_str = format_speed(speed)
+                                        
+                                        if progress_callback and total_size:
+                                            progress = (downloaded / total_size) * 100
+                                            progress_callback(
+                                                os.path.basename(filepath),
+                                                progress,
+                                                speed_str
+                                            )
+                                
                                 last_update = current_time
                     
                     # If we get here, download was successful

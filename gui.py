@@ -7,6 +7,7 @@ from m3u_parser import M3UParser, M3UEntry
 from async_downloader import DownloadManager
 from file_utils import ensure_unique_filename
 import threading
+from utils import get_extension_from_url
 
 class M3UDownloaderGUI:
     def __init__(self):
