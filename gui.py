@@ -206,18 +206,36 @@ class M3UDownloaderGUI:
         for item in items:
             values = self.tree.item(item)['values']
             url = values[1]
-            filename = values[0]
+            filename = f"{values[0]}{self._get_extension_from_url(url)}"  # Add proper extension
             filepath = ensure_unique_filename(output_dir, filename)
             downloads.append((url, filepath))
             self.tree.set(item, "Status", "Queued")
             self.tree.set(item, "Speed", "")
             
         def update_progress(filename: str, progress: float, speed: Optional[float] = None):
-            self.window.after(0, self._update_progress, filename, progress, speed)
+            try:
+                self.window.after(0, self._update_progress, filename, progress, speed)
+            except Exception as e:
+                print(f"Progress update error: {str(e)}")
             
-        self.download_manager.start_downloads(downloads, update_progress)
-        self.status_var.set("Downloading files...")
+        def error_callback(filename: str, error: str):
+            self.window.after(0, lambda: self.tree.set(
+                [item for item in self.tree.get_children() 
+                 if self.tree.item(item)['values'][0] == filename][0],
+                "Status", f"Error: {error}"
+            ))
+
+        try:
+            self.download_manager.start_downloads(downloads, progress_callback=update_progress)
+            self.status_var.set("Downloading files...")
+        except Exception as e:
+            messagebox.showerror("Download Error", f"Failed to start downloads: {str(e)}")
         
+    def _get_extension_from_url(self, url: str) -> str:
+        """Extract the file extension from a URL."""
+        parsed_url = os.path.splitext(url)
+        return parsed_url[1] if parsed_url[1] else ".unknown"
+
     def _format_speed(self, speed: float) -> str:
         """Format speed in bytes/second to human readable format."""
         if speed < 1024:
@@ -242,4 +260,4 @@ class M3UDownloaderGUI:
         
     def _on_closing(self):
         self.download_manager.shutdown()
-        self.window.destroy()
+        self.window.destroy
